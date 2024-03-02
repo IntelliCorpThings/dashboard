@@ -1,6 +1,6 @@
 import requests
 
-ip = '34.95.217.0:8666'
+ip = '34.95.217.0'
 
 # Constantes
 HEADERS = {'fiware-service': 'smart', 'fiware-servicepath': '/'}
