@@ -70,7 +70,7 @@ def hello():
 def update_load():
     with app.app_context():
         while True:
-            time.sleep(60*7)
+            time.sleep(5)
             turbo.push(turbo.replace(render_template('refreshable.html'), 'load'))
             
 
