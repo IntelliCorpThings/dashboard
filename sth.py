@@ -24,5 +24,6 @@ def get_attribute_data(entity, lastN=None):
         error = f"Erro ao obter dados: {err}"
     return error
 
-attribute_data = get_attribute_data("tempext")
-print(attribute_data)
+if __name__ == '__main__':
+    attribute_data = get_attribute_data("tempext")
+    print(attribute_data)
