@@ -59,6 +59,22 @@ def inject_load():
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/temperature.svg',
             'image_alt': 'Temp. Externa'
+        },
+        'co2': {
+            'name': 'CO2',
+            'value': int(random.random() * 100) / 100,
+            'unit': '%',
+            'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+            'image_location': '/static/images/co2.png',
+            'image_alt': 'CO2'
+        },
+        'volume': {
+            'name': 'Volume',
+            'value': int(random.random() * 100) / 100,
+            'unit': 'mL',
+            'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+            'image_location': '/static/images/measure.svg',
+            'image_alt': 'mL'
         }
     }
     return {'values': values_dict}
