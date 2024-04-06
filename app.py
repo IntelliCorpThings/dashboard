@@ -1,13 +1,59 @@
 from datetime import datetime
-from flask import Flask, flash, render_template
+from flask import Flask, flash, render_template, request
 import random
 from turbo_flask import Turbo
 import threading
 import time
+from pint import UnitRegistry
+ureg = UnitRegistry()
+Q_ = ureg.Quantity 
 
 app = Flask(__name__)
 
 turbo = Turbo(app)
+
+unit_options = {
+    'alcohol': {
+        'options': ['%'],
+        'selectedOption': '%',
+        'label': 'Teor alcóolico'
+    },
+    'brix': {
+        'options': ['°Bx'],
+        'selectedOption': '°Bx',
+        'label': 'Brix'
+    },
+    'density': {
+        'options': ['kg/m³', 'g/cm³', 'lb/ft³'],
+        'selectedOption': 'kg/m³',
+        'label': 'Densidade'
+    },
+    'pressure': {
+        'options': ['psi', 'bar'],
+        'selectedOption': 'psi',
+        'label': 'Pressão'
+    },
+    'internal_temperature': {
+        'options': ['°C', '°F'],
+        'selectedOption': '°C',
+        'label': 'Temperatura Interna'
+    },
+    'external_temperature': {
+        'options': ['°C', '°F'],
+        'selectedOption': '°C',
+        'label': 'Temperatura Externa'
+    },
+    'co2': {
+        'options': ['%'],
+        'selectedOption': '%',
+        'label': 'Gás Carbônico'
+    },
+    'volume': {
+        'options': ['ml', 'floz', 'cups', 'l', 'gal'],
+        'selectedOption': 'ml',
+        'label': 'Volume'
+    }
+}
 
 @app.context_processor
 def inject_load():
@@ -82,6 +128,15 @@ def inject_load():
 @app.route('/')
 def hello():
     return render_template('index.html')
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if request.method == 'GET':
+        return render_template('settings.html', values=unit_options)
+    if request.method == 'POST':
+        for item in unit_options.keys():
+            unit_options[item]['selectedOption'] = request.form[item]
+        return render_template('settings.html', values=unit_options)
 
 def update_load():
     with app.app_context():

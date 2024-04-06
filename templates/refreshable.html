@@ -1,4 +1,9 @@
 <div id="load" class="load">
+    <div>
+        <a href="/settings" class="configButton">
+            <img src="/static/images/settings.png" alt="config" width="40" height="40">
+        </a>
+    </div>
     {% for item in values.keys() %}
         <div class="card">
             <h1>{{values[item].name}}</h1>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <link rel="stylesheet" href='/static/style/style.css' />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>IntelliTWine</title>
+    </head>
+    <body>
+        <form class="form" action="/settings" method="post" role="form">
+            <h1>Configurações</h1>
+            <a class="formReturn" href="/">
+                <img src="/static/images/arrow.png" alt="Girl in a jacket" width="500" height="600">
+            </a>
+            {% for item in values.keys() %}
+                <div class="formField">
+                    <label for="{{item}}">{{values[item].label}}</label>
+                    <select name="{{item}}" id="{{item}}">
+                        {% for i in values[item].options %}
+                            <option {% if values[item].selectedOption == i %}selected{% endif %} value="{{i}}">{{i}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endfor %}
+            <input class="formSubmit" type="submit" name="submit" value="Enviar">
+        </form>
+    </body>
+</html>
