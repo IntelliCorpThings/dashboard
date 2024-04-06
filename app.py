@@ -4,6 +4,8 @@ import random
 from turbo_flask import Turbo
 import threading
 import time
+from sth import get_attribute_data, calc_brix_level, calc_density
+import math
 
 app = Flask(__name__)
 
@@ -14,7 +16,7 @@ def inject_load():
     values_dict = {
         'alcohol': {
             'name': 'Teor alcoólico',
-            'value': int(random.random() * 100) / 100,
+            'value': "{:.2f}".format(float(calc_brix_level()) * 0.6),
             'unit': '%',
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/alcool.png',
@@ -22,15 +24,15 @@ def inject_load():
         },
         'brix': {
             'name': 'BRIX',
-            'value': int(random.random() * 100) / 100,
-            'unit': '%',
+            'value': calc_brix_level(),
+            'unit': 'ºbx',
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/sugar.png',
             'image_alt': 'BRIX'
         },
         'density': {
             'name': 'Densidade',
-            'value': int(random.random() * 100) / 100,
+            'value': "{:.2f}".format(calc_density()),
             'unit': 'kg/m³',
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/density.svg',
@@ -38,7 +40,7 @@ def inject_load():
         },
         'pressure': {
             'name': 'Pressão',
-            'value': int(random.random() * 100) / 100,
+            'value': "{:.2f}".format((get_attribute_data('pressure_bottom').get('value') + get_attribute_data('pressure_middle').get('value'))/2),
             'unit': 'PSI',
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/pressure.svg',
@@ -46,7 +48,7 @@ def inject_load():
         },
         'internal_temperature': {
             'name': 'Temp. Interna',
-            'value': int(random.random() * 100) / 100,
+            'value': get_attribute_data('temperature_int').get('value'),
             'unit': '°C',
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/temperature.svg',
@@ -54,7 +56,7 @@ def inject_load():
         },
         'external_temperature': {
             'name': 'Temp. Externa',
-            'value': int(random.random() * 100) / 100,
+            'value': get_attribute_data('temperature_ext').get('value'),
             'unit': '°C',
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/temperature.svg',
@@ -62,7 +64,7 @@ def inject_load():
         },
         'co2': {
             'name': 'CO2',
-            'value': int(random.random() * 100) / 100,
+            'value': get_attribute_data('carbon').get('value'),
             'unit': '%',
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/co2.png',
@@ -70,7 +72,7 @@ def inject_load():
         },
         'volume': {
             'name': 'Volume',
-            'value': int(random.random() * 100) / 100,
+            'value': "{:.2f}".format((get_attribute_data('distance').get('value')-21)*math.pi*(10**2)),
             'unit': 'mL',
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/measure.svg',
