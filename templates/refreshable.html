@@ -14,10 +14,53 @@
                 </div>
                 <img class="content_img" src="{{values[item].image_location}}" alt="{{values[item].image_alt}}">
             </div>
-            <button>
+            <button class="openGraph{{item}}">
                 <p>Ver Gráfico</p>
                 <img src="/static/images/chart.svg" alt="Gráfico">
             </button>
         </div>
     {% endfor %}
+    <dialog class="dialog">
+        <button class="dialogClose" autofocus>Close</button>
+        <canvas class="chart" id="myChart"></canvas>
+    </dialog>
+    <script>
+        const dialog = document.querySelector("dialog");
+        const showButton = document.querySelector(".openGraphalcohol");
+        const closeButton = document.querySelector("dialog button");
+        
+        // "Show the dialog" button opens the dialog modally
+        showButton.addEventListener("click", () => {
+          dialog.showModal();
+        });
+        
+        // "Close" button closes the dialog
+        closeButton.addEventListener("click", () => {
+          dialog.close();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            borderWidth: 1
+        }]
+        },
+        options: {
+        scales: {
+            y: {
+            beginAtZero: true
+            }
+        }
+        }
+    });
+    </script>
 </div>

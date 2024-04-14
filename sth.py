@@ -1,20 +1,45 @@
 import requests
+from datetime import datetime, timedelta
 
 ip = '46.17.108.131'
 
 # Constantes
 HEADERS = {'fiware-service': 'smart', 'fiware-servicepath': '/'}
 
+def get_previous_days(numero_dias):
+    hoje = datetime.now()
+
+    dias = []
+
+    for i in range(numero_dias):
+        dia_anterior = hoje - timedelta(days=i + 1)
+        dias.append(dia_anterior.strftime("%Y-%m-%d"))
+
+    dias.reverse()
+    
+    return dias
+
 def get_attribute_data(entity, lastN=None):
     """Obtém dados do atributo da API."""
+    url = ''
     if lastN is not None:
-        url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:WineTest:003/attributes/{entity}?lastN={lastN}"
+        url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:WineTest:003/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom=2024-04-01T00:00:00.000Z&dateTo=2024-04-07T23:59:59.999Z"
     else:
         url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:WineTest:003/attrs/{entity}"
     try:
-        response = requests.get(url, headers=HEADERS)
-        response.raise_for_status()
-        result = response.json()
+        if lastN is not None:
+            result = []
+            dateList = get_previous_days(lastN)
+            for currDate in dateList:
+                url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:WineTest:003/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom={currDate}T00:00:00.000Z&dateTo={currDate}T23:59:59.999Z"
+                response = requests.get(url, headers=HEADERS)
+                response.raise_for_status()
+                result.append(response.json()['contextResponses'][0]['contextElement']['attributes'][0]['values'])
+        else:
+            url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:WineTest:003/attrs/{entity}"
+            response = requests.get(url, headers=HEADERS)
+            response.raise_for_status()
+            result = response.json()
         return result
     except requests.HTTPError as http_err:
         return f"Erro HTTP ao obter dados: {http_err}"
