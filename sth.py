@@ -1,5 +1,7 @@
 import requests
+import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
+import json
 
 ip = '46.17.108.131'
 
@@ -23,44 +25,54 @@ def get_attribute_data(entity, lastN=None):
     """Obtém dados do atributo da API."""
     url = ''
     if lastN is not None:
-        url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:WineTest:003/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom=2024-04-01T00:00:00.000Z&dateTo=2024-04-07T23:59:59.999Z"
+        url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:WineReactor:001/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom=2024-04-01T00:00:00.000Z&dateTo=2024-04-07T23:59:59.999Z"
     else:
-        url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:WineTest:003/attrs/{entity}"
+        url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:WineReactor:001/attrs/{entity}"
     try:
         if lastN is not None:
             result = []
             dateList = get_previous_days(lastN)
             for currDate in dateList:
-                url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:WineTest:003/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom={currDate}T00:00:00.000Z&dateTo={currDate}T23:59:59.999Z"
+                url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:WineReactor:001/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom={currDate}T00:00:00.000Z&dateTo={currDate}T23:59:59.999Z"
                 response = requests.get(url, headers=HEADERS)
                 response.raise_for_status()
                 result.append(response.json()['contextResponses'][0]['contextElement']['attributes'][0]['values'])
         else:
-            url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:WineTest:003/attrs/{entity}"
+            url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:WineReactor:001/attrs/{entity}"
             response = requests.get(url, headers=HEADERS)
             response.raise_for_status()
             result = response.json()
+
+        # result2 = {}
+        # for idx, x in enumerate(result):
+        #     result2[]
         return result
     except requests.HTTPError as http_err:
         return f"Erro HTTP ao obter dados: {http_err}"
     except Exception as err:
         return f"Erro ao obter dados: {err}"
 
-def calc_brix_level():
+def calc_brix_level(value=None):
     g = 9.81  # m/s², gravidade na Terra
     rho_w = 1000  # kg/m³, densidade da água
     delta_h = 0.061  # metros, distância entre os sensores
     psi_to_pa = 6894.76
     
     # Obtendo os valores de pressão
-    pressure_bottom_data = get_attribute_data('pressure_bottom')
-    pressure_middle_data = get_attribute_data('pressure_middle')
+    if value == None:
+        pressure_bottom_data = get_attribute_data('pressure_bottom')
+        pressure_middle_data = get_attribute_data('pressure_middle')
+    else:
+        pressure_bottom_data = value
+        pressure_middle_data = value
 
     if isinstance(pressure_bottom_data, dict) and isinstance(pressure_middle_data, dict):
-        pressure_bottom = pressure_bottom_data.get('value') * psi_to_pa
-        pressure_middle = pressure_middle_data.get('value') * psi_to_pa
-        print(pressure_bottom_data.get('value'))
-        print(pressure_middle_data.get('value'))
+        if value == None:
+            pressure_bottom = pressure_bottom_data.get('value') * psi_to_pa
+            pressure_middle = pressure_middle_data.get('value') * psi_to_pa
+        else:
+            pressure_bottom = pressure_bottom_data * psi_to_pa
+            pressure_middle = pressure_middle_data * psi_to_pa
         # Calculando a pressão diferencial (ΔP)
         delta_p = pressure_bottom - pressure_middle
         # Calculando a densidade do líquido (ρ) usando a equação (2)
@@ -75,17 +87,25 @@ def calc_brix_level():
         print("Erro ao obter dados de pressão.")
         return 'error'
 
-def calc_density():
+def calc_density(value=None):
     # Constantes
     g = 9.81  # m/s², gravidade na Terra
     psi_to_pa = 6894.76  # Conversão de PSI para Pascal
     cm_to_m = 0.01  # Conversão de cm para metros
-    pressure_bottom_data = get_attribute_data('pressure_bottom')
-    pressure_middle_data = get_attribute_data('pressure_middle')
+    if value == None:
+        pressure_bottom_data = get_attribute_data('pressure_bottom')
+        pressure_middle_data = get_attribute_data('pressure_middle')
+    else:
+        pressure_bottom_data = value
+        pressure_middle_data = value
     # Convertendo pressões de PSI para Pascal
     
-    pressure_bottom = pressure_bottom_data.get('value') * psi_to_pa
-    pressure_middle = pressure_middle_data.get('value') * psi_to_pa
+    if value == None:
+        pressure_bottom = pressure_bottom_data.get('value') * psi_to_pa
+        pressure_middle = pressure_middle_data.get('value') * psi_to_pa
+    else:
+        pressure_bottom = pressure_bottom_data * psi_to_pa
+        pressure_middle = pressure_middle_data * psi_to_pa
     
     # Convertendo distância entre os sensores para metros
     distance_sensors = 0.061

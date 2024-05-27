@@ -10,6 +10,8 @@ from pint import UnitRegistry
 from datetime import datetime, timedelta
 from sth import get_attribute_data, calc_brix_level, calc_density
 import math
+import json
+
 ureg = UnitRegistry()
 Q_ = ureg.Quantity 
 
@@ -26,7 +28,7 @@ unit_options = {
     'brix': {
         'options': ['°bx'],
         'selectedOption': '°bx',
-        'label': 'Brix'
+        'label': 'Teor de Sólidos Solúveis'
     },
     'density': {
         'options': ['kg/m³', 'g/cm³', 'lb/ft³'],
@@ -34,9 +36,9 @@ unit_options = {
         'label': 'Densidade'
     },
     'pressure': {
-        'options': ['psi', 'bar'],
-        'selectedOption': 'psi',
-        'label': 'Pressão'
+        'options': ['g', 'kg'],
+        'selectedOption': 'g',
+        'label': 'Massa'
     },
     'internal_temperature': {
         'options': ['°C', '°F'],
@@ -66,6 +68,13 @@ def get_converted_value(value, startUnit, finalUnit):
     else:
         return round(float(Q_(value, startUnit).to(finalUnit).magnitude), 2)
 
+def limitValue(val, max):
+    if val < 0:
+        return 0
+    elif val > max:
+        return max
+    else:
+        return val
 
 @app.context_processor
 def inject_load():
@@ -73,10 +82,13 @@ def inject_load():
         'alcohol': {
             'name': 'Teor alcoólico',
             'value': "{:.2f}".format(
-                get_converted_value(
-                    float(calc_brix_level()) * 0.6,
-                    '%',
-                    unit_options['alcohol']['selectedOption']
+                limitValue(
+                    get_converted_value(
+                        float(calc_brix_level()) * 0.6,
+                        '%',
+                        unit_options['alcohol']['selectedOption']
+                    ),
+                    100
                 )
             ),
             'unit': unit_options['alcohol']['selectedOption'],
@@ -85,23 +97,29 @@ def inject_load():
             'image_alt': 'Umidade'
         },
         'brix': {
-            'name': 'BRIX',
-            'value': get_converted_value(
-                calc_brix_level(),
-                '°bx',
-                unit_options['brix']['selectedOption']
+            'name': 'Teor de Sólidos Solúveis',
+            'value': limitValue(
+                    get_converted_value(
+                    calc_brix_level(),
+                    '°bx',
+                    unit_options['brix']['selectedOption']
+                ),
+                100
             ),
             'unit': unit_options['brix']['selectedOption'],
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/sugar.png',
-            'image_alt': 'BRIX'
+            'image_alt': 'Teor de Sólidos Solúveis'
         },
         'density': {
             'name': 'Densidade',
-            'value': "{:.2f}".format(get_converted_value(
-                calc_density(),
-                'kg/m³',
-                unit_options['density']['selectedOption']
+            'value': "{:.2f}".format(limitValue(
+                get_converted_value(
+                    calc_density(),
+                    'kg/m³',
+                    unit_options['density']['selectedOption']
+                ),
+                5000
             )),
             'unit': unit_options['density']['selectedOption'],
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
@@ -112,7 +130,7 @@ def inject_load():
             'name': 'Pressão',
             'value': "{:.2f}".format(get_converted_value(
                 (get_attribute_data('pressure_bottom').get('value') + get_attribute_data('pressure_middle').get('value'))/2,
-                'psi',
+                'g',
                 unit_options['pressure']['selectedOption']
             )),
             'unit': unit_options['pressure']['selectedOption'],
@@ -175,6 +193,95 @@ def inject_load():
 def hello():
     return render_template('index.html')
 
+def calcular_media(valores):
+    return sum(valores) / len(valores) if valores else 0
+
+@app.route('/getmultdata/<finddata>', methods=['GET', 'POST'])
+def getmultdata(finddata):
+    resultados = {}
+
+    # Processar os dados
+    for dia in get_attribute_data('temperature_int', 45):
+        # Verificar se há elementos no dia
+        if not dia:
+            continue
+        
+        # Extrair a data do primeiro elemento válido
+        data_str = dia[0]["_id"]["origin"]
+        data_obj = datetime.strptime(data_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+        data_formatada = data_obj.strftime("%d/%m/%Y")
+        
+        # Coletar todos os valores 'max' do dia, garantindo que há pontos válidos
+        valores_max = []
+        for item in dia:
+            if "points" in item and item["points"]:
+                for ponto in item["points"]:
+                    if "max" in ponto:
+                        valores_max.append(ponto["max"])
+
+        print('valores_max')
+        print(valores_max)
+        
+        # Verificar se há valores antes de calcular a média
+        if valores_max:
+            tempValue = 0
+            media_max = calcular_media(valores_max)
+            match finddata:
+                case 'alcohol':
+                    tempValue = get_converted_value(
+                        float(calc_brix_level(media_max)) * 0.6,
+                        '%',
+                        unit_options['alcohol']['selectedOption']
+                    )
+                case 'brix': 
+                    tempValue = get_converted_value(
+                        calc_brix_level(media_max),
+                        '°bx',
+                        unit_options['brix']['selectedOption']
+                    )
+                case 'density': 
+                    tempValue = get_converted_value(
+                        calc_density(media_max),
+                        'kg/m³',
+                        unit_options['density']['selectedOption']
+                    )
+                case 'pressure': 
+                    tempValue = get_converted_value(
+                        (media_max + media_max)/2,
+                        'psi',
+                        unit_options['pressure']['selectedOption']
+                    )
+                case 'temperature_int': 
+                    tempValue = get_converted_value(
+                        media_max,
+                        '°C',
+                        unit_options['internal_temperature']['selectedOption']
+                    )
+                case 'temperature_ext':
+                    tempValue = get_converted_value(
+                        media_max,
+                        '°C',
+                        unit_options['external_temperature']['selectedOption']
+                    )
+                case 'co2': 
+                    tempValue = get_converted_value(
+                        media_max,
+                        '%',
+                        unit_options['co2']['selectedOption']
+                    )
+                case 'volume': 
+                    tempValue = get_converted_value(
+                        (media_max-21)*math.pi*(10**2),
+                        'ml',
+                        unit_options['volume']['selectedOption']
+                    )
+            # Adicionar ao resultado
+            resultados[data_formatada] = tempValue
+
+    # Converter para JSON
+    json_resultado = json.dumps(resultados, indent=4)
+    print(json_resultado)
+    return resultados
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
@@ -188,7 +295,7 @@ def settings():
 def update_load():
     with app.app_context():
         while True:
-            time.sleep(5)
+            time.sleep(10*60)
             print(get_attribute_data('pressure_bottom').get('value'))
             print(get_attribute_data('pressure_middle').get('value'))
             turbo.push(turbo.replace(render_template('refreshable.html'), 'load'))

@@ -9,8 +9,8 @@
             <h1>{{values[item].name}}</h1>
             <div class="content">
                 <div class="content_values">
-                    <h2>{{values[item].value}} {{values[item].unit}}</h2>
                     <p>Última atualização: {{values[item].last_update}}</p>
+                    <h2>{{values[item].value}} {{values[item].unit}}</h2>
                 </div>
                 <img class="content_img" src="{{values[item].image_location}}" alt="{{values[item].image_alt}}">
             </div>
@@ -24,43 +24,52 @@
         <button class="dialogClose" autofocus>Close</button>
         <canvas class="chart" id="myChart"></canvas>
     </dialog>
+
     <script>
+        let dialogs = {}
         const dialog = document.querySelector("dialog");
-        const showButton = document.querySelector(".openGraphalcohol");
         const closeButton = document.querySelector("dialog button");
-        
-        // "Show the dialog" button opens the dialog modally
-        showButton.addEventListener("click", () => {
-          dialog.showModal();
-        });
-        
-        // "Close" button closes the dialog
-        closeButton.addEventListener("click", () => {
-          dialog.close();
-        });
     </script>
+    
+    {% for item in values.keys() %}
+        <script>
+            dialogs['{{item}}'] = document.querySelector(".openGraph{{item}}");
+            // const showButton = document.querySelector(".openGraph{{item}}");
+            
+            // "Show the dialog" button opens the dialog modally
+            dialogs['{{item}}'].addEventListener("click", () => {
+            dialog.showModal();
+            });
+            
+            // "Close" button closes the dialog
+            closeButton.addEventListener("click", () => {
+            dialog.close();
+            });
+        </script>
+    {% endfor %}
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-    const ctx = document.getElementById('myChart');
+        const ctx = document.getElementById('myChart');
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-        datasets: [{
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
-            borderWidth: 1
-        }]
-        },
-        options: {
-        scales: {
-            y: {
-            beginAtZero: true
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+            labels: ['14/04/2024', '15/04/2024', '16/04/2024', '17/04/2024', '18/04/2024', '19/04/2024', '20/04/2024', '21/04/2024', '22/04/2024', '23/04/2024', '24/04/2024', '25/04/2024', '26/04/2024', '27/04/2024', '28/04/2024', '29/04/2024', '30/04/2024', '02/05/2024', '03/05/2024', '04/05/2024'],
+            datasets: [{
+                label: 'Temperatura Interna (ºC)',
+                data: [19.71, 22.03, 23.08, 17.61, 17.16, 17.2, 18.62, 22.5, 22.1, 24.54, 25.74, 25.88, 23.68, 24.67, 23.35, 25.1, 25.7, 25.32, 23.71, 25.46],
+                borderWidth: 1
+            }]
+            },
+            options: {
+            scales: {
+                y: {
+                beginAtZero: false
+                }
             }
-        }
-        }
-    });
+            }
+        });
     </script>
 </div>
