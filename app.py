@@ -63,10 +63,13 @@ unit_options = {
 }
 
 def get_converted_value(value, startUnit, finalUnit):
-    if startUnit == '°bx':
-        return round(float(value), 2)
-    else:
-        return round(float(Q_(value, startUnit).to(finalUnit).magnitude), 2)
+    try:
+        if startUnit == '°bx':
+            return round(float(value), 2)
+        else:
+            return round(float(Q_(value, startUnit).to(finalUnit).magnitude), 2)
+    except:
+        return 0
 
 def limitValue(val, max):
     if val < 0:
@@ -194,14 +197,36 @@ def hello():
     return render_template('index.html')
 
 def calcular_media(valores):
-    return sum(valores) / len(valores) if valores else 0
+    try:
+        return sum(valores) / len(valores) if valores else 0
+    except:
+        return 0
 
 @app.route('/getmultdata/<finddata>', methods=['GET', 'POST'])
 def getmultdata(finddata):
     resultados = {}
+    sth_name = ''
+
+    match finddata:
+        case 'alcohol':
+            sth_name = 'pressure_bottom'
+        case 'brix': 
+            sth_name = 'pressure_bottom'
+        case 'density': 
+            sth_name = 'pressure_bottom'
+        case 'pressure': 
+            sth_name = 'pressure_bottom'
+        case 'internal_temperature': 
+            sth_name = 'temperature_int'
+        case 'external_temperature':
+            sth_name = 'temperature_ext'
+        case 'co2': 
+            sth_name = 'carbon'
+        case 'volume': 
+            sth_name = 'distance'
 
     # Processar os dados
-    for dia in get_attribute_data('temperature_int', 45):
+    for dia in get_attribute_data(sth_name, 45):
         # Verificar se há elementos no dia
         if not dia:
             continue
@@ -251,13 +276,13 @@ def getmultdata(finddata):
                         'psi',
                         unit_options['pressure']['selectedOption']
                     )
-                case 'temperature_int': 
+                case 'internal_temperature': 
                     tempValue = get_converted_value(
                         media_max,
                         '°C',
                         unit_options['internal_temperature']['selectedOption']
                     )
-                case 'temperature_ext':
+                case 'external_temperature':
                     tempValue = get_converted_value(
                         media_max,
                         '°C',
@@ -303,7 +328,7 @@ def update_load():
 
 th = threading.Thread(target=update_load)
 th.daemon = True
-th.start()
             
 if __name__ == '__main__':
+    th.start()
     app.run(debug=True, host='0.0.0.0', port=5000)
