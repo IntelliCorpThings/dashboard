@@ -179,11 +179,11 @@ def inject_load():
         },
         'volume': {
             'name': 'Volume',
-            'value': "{:.2f}".format(get_converted_value(
-                (get_attribute_data('distance').get('value')-21)*math.pi*(10**2),
+            'value': "{:.2f}".format(limitValue(get_converted_value(
+                (21 - get_attribute_data('distance').get('value'))*math.pi*((8.7**2) + 8.7*9.65 + (9.65**2))/3,
                 'ml',
                 unit_options['volume']['selectedOption']
-            )),
+            ),9999999999)),
             'unit': unit_options['volume']['selectedOption'],
             'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
             'image_location': '/static/images/measure.svg',
@@ -296,7 +296,7 @@ def getmultdata(finddata):
                     )
                 case 'volume': 
                     tempValue = get_converted_value(
-                        (media_max-21)*math.pi*(10**2),
+                        limitValue((21 - media_max)*math.pi*((8.7**2) + 8.7*9.65 + (9.65**2))/3, 9999999999),
                         'ml',
                         unit_options['volume']['selectedOption']
                     )
