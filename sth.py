@@ -75,6 +75,9 @@ def calc_brix_level(value=None):
             pressure_middle = pressure_middle_data * psi_to_pa
         # Calculando a pressão diferencial (ΔP)
         delta_p = pressure_bottom - pressure_middle
+        if delta_p < 0 :
+            delta_p = delta_p * -1; 
+
         # Calculando a densidade do líquido (ρ) usando a equação (2)
         rho = delta_p / (g * delta_h)
         # Calculando a Gravidade Específica (SG) do líquido usando a equação (3)
@@ -112,6 +115,8 @@ def calc_density(value=None):
     
     # Calculando a pressão diferencial (ΔP) em Pascal
     delta_p = pressure_bottom - pressure_middle
+    if delta_p < 0 :
+        delta_p = delta_p * -1; 
     
     # Calculando a densidade do líquido (ρ) usando a equação (2)
     rho = delta_p / (g * distance_sensors)

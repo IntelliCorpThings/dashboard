@@ -132,7 +132,7 @@ def inject_load():
         'pressure': {
             'name': 'Pressão',
             'value': "{:.2f}".format(get_converted_value(
-                (get_attribute_data('pressure_bottom').get('value') + get_attribute_data('pressure_middle').get('value'))/2,
+                (abs(get_attribute_data('pressure_bottom').get('value') + get_attribute_data('pressure_middle').get('value'))/2),
                 'g',
                 unit_options['pressure']['selectedOption']
             )),
