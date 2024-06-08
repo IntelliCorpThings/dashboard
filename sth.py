@@ -25,20 +25,20 @@ def get_attribute_data(entity, lastN=None):
     """Obtém dados do atributo da API."""
     url = ''
     if lastN is not None:
-        url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:WineReactor:001/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom=2024-04-01T00:00:00.000Z&dateTo=2024-04-07T23:59:59.999Z"
+        url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:unittest:001/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom=2024-04-01T00:00:00.000Z&dateTo=2024-04-07T23:59:59.999Z"
     else:
-        url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:WineReactor:001/attrs/{entity}"
+        url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:unittest:001/attrs/{entity}"
     try:
         if lastN is not None:
             result = []
             dateList = get_previous_days(lastN)
             for currDate in dateList:
-                url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:WineReactor:001/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom={currDate}T00:00:00.000Z&dateTo={currDate}T23:59:59.999Z"
+                url = f"http://{ip}:8666/STH/v1/contextEntities/type/dt/id/urn:ngsi-ld:unitest:001/attributes/{entity}?aggrMethod=max&aggrPeriod=minute&dateFrom={currDate}T00:00:00.000Z&dateTo={currDate}T23:59:59.999Z"
                 response = requests.get(url, headers=HEADERS)
                 response.raise_for_status()
                 result.append(response.json()['contextResponses'][0]['contextElement']['attributes'][0]['values'])
         else:
-            url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:WineReactor:001/attrs/{entity}"
+            url = f"http://{ip}:1026/v2/entities/urn:ngsi-ld:unittest:001/attrs/{entity}"
             response = requests.get(url, headers=HEADERS)
             response.raise_for_status()
             result = response.json()
