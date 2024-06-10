@@ -169,7 +169,7 @@ def inject_load():
             'name': 'CO2',
             'value': get_converted_value(
                 get_attribute_data('carbon').get('value'),
-                '%',
+                'ppm',
                 unit_options['co2']['selectedOption']
             ),
             'unit': unit_options['co2']['selectedOption'],
