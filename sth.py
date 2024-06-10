@@ -88,7 +88,7 @@ def calc_brix_level(value=None):
         return "{:.2f}".format(brix)
     else:
         print("Erro ao obter dados de pressão.")
-        return 'error'
+        return 0
 
 def calc_density(value=None):
     # Constantes
