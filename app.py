@@ -320,7 +320,7 @@ def settings():
 def update_load():
     with app.app_context():
         while True:
-            time.sleep(10*60)
+            time.sleep(0.2)
             print(get_attribute_data('pressure_bottom').get('value'))
             print(get_attribute_data('pressure_middle').get('value'))
             turbo.push(turbo.replace(render_template('refreshable.html'), 'load'))
